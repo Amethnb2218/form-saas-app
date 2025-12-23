@@ -1,0 +1,25 @@
+<% layout('layout') -%>
+<h1>Bienvenue sur la plateforme de formulaires</h1>
+<p>Sélectionnez une entreprise ou un formulaire pour commencer.</p>
+
+<h3>Entreprises disponibles</h3>
+<div class="row">
+  <% companies.forEach(function(company) { %>
+    <div class="col-md-4 mb-3">
+      <div class="card">
+        <% if (company.logoPath) { %>
+        <img src="<%= company.logoPath %>" class="card-img-top" alt="Logo <%= company.companyName %>">
+        <% } %>
+        <div class="card-body">
+          <h5 class="card-title"><%= company.companyName %></h5>
+          <p class="card-text">Formulaires :</p>
+          <ul class="list-unstyled">
+            <% forms.filter(f => f.company._id.toString() === company._id.toString()).forEach(function(form) { %>
+              <li><a href="/form/<%= form._id %>"><%= form.title %></a></li>
+            <% }); %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% }); %>
+</div>

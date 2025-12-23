@@ -1,0 +1,25 @@
+<% layout('layout') -%>
+<h2>Inscription de l'entreprise</h2>
+<form action="/register" method="POST" enctype="multipart/form-data" class="mt-3">
+  <div class="mb-3">
+    <label for="username" class="form-label">Nom d'utilisateur</label>
+    <input type="text" class="form-control" id="username" name="username" required />
+  </div>
+  <div class="mb-3">
+    <label for="password" class="form-label">Mot de passe</label>
+    <input type="password" class="form-control" id="password" name="password" required />
+  </div>
+  <div class="mb-3">
+    <label for="companyName" class="form-label">Nom de l'entreprise</label>
+    <input type="text" class="form-control" id="companyName" name="companyName" required />
+  </div>
+  <div class="mb-3">
+    <label for="logo" class="form-label">Logo (optionnel)</label>
+    <input type="file" class="form-control" id="logo" name="logo" accept="image/*" />
+  </div>
+  <% if (error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+  <button type="submit" class="btn btn-primary">S'inscrire</button>
+  <p class="mt-3"><a href="/login">Déjà inscrit ? Se connecter</a></p>
+</form>

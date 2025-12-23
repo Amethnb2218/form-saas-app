@@ -1,0 +1,68 @@
+<% layout('layout') -%>
+<h2>Créer un formulaire</h2>
+<form action="/form/new" method="POST" class="mt-3">
+  <div class="mb-3">
+    <label for="title" class="form-label">Titre du formulaire</label>
+    <input type="text" class="form-control" id="title" name="title" required />
+  </div>
+  <div id="fields-container">
+    <h5>Champs du formulaire</h5>
+    <div class="row g-2 mb-2 field-row">
+      <div class="col-md-5">
+        <input type="text" class="form-control" name="fieldNames" placeholder="Nom du champ" required />
+      </div>
+      <div class="col-md-4">
+        <select class="form-select" name="fieldTypes">
+          <option value="text">Texte</option>
+          <option value="email">E‑mail</option>
+          <option value="number">Nombre</option>
+          <option value="date">Date</option>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex align-items-center">
+        <button type="button" class="btn btn-danger remove-field-btn d-none">Supprimer</button>
+      </div>
+    </div>
+  </div>
+  <button type="button" class="btn btn-secondary mb-3" id="add-field-btn">+ Ajouter un champ</button>
+  <div class="mb-3">
+    <label for="template" class="form-label">Modèle</label>
+    <select class="form-select" id="template" name="template">
+      <option value="default">Défaut</option>
+      <option value="minimal">Minimal</option>
+      <!-- Ajoutez d'autres modèles ici -->
+    </select>
+  </div>
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" value="on" id="allowFile" name="allowFile" />
+    <label class="form-check-label" for="allowFile">Autoriser le téléchargement de fichier (photo/CV)</label>
+  </div>
+  <% if (error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+  <button type="submit" class="btn btn-primary">Créer le formulaire</button>
+  <a href="/dashboard" class="btn btn-link">Annuler</a>
+</form>
+
+<script>
+document.getElementById('add-field-btn').addEventListener('click', function () {
+  const container = document.getElementById('fields-container');
+  const row = document.querySelector('.field-row').cloneNode(true);
+  // Clear values
+  row.querySelectorAll('input, select').forEach(el => {
+    el.value = '';
+  });
+  // Show remove button
+  row.querySelector('.remove-field-btn').classList.remove('d-none');
+  row.querySelector('.remove-field-btn').addEventListener('click', function () {
+    row.remove();
+  });
+  container.appendChild(row);
+});
+// Show remove buttons for existing rows except the first
+document.querySelectorAll('.remove-field-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    btn.parentElement.parentElement.remove();
+  });
+});
+</script>

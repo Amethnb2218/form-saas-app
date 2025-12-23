@@ -1,0 +1,32 @@
+<% layout('layout') -%>
+<h2>Tableau de bord</h2>
+<p>Gérer vos formulaires.</p>
+<a href="/form/new" class="btn btn-success mb-3">+ Nouveau formulaire</a>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Titre</th>
+      <th>Champs</th>
+      <th>Fichier autorisé ?</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (forms.length === 0) { %>
+      <tr><td colspan="4">Aucun formulaire créé.</td></tr>
+    <% } %>
+    <% forms.forEach(function(form) { %>
+      <tr>
+        <td><%= form.title %></td>
+        <td><%= form.fields.map(f => f.name + ' (' + f.type + ')').join(', ') %></td>
+        <td><%= form.allowFile ? 'Oui' : 'Non' %></td>
+        <td>
+          <a href="/form/<%= form._id %>" class="btn btn-sm btn-primary" target="_blank">Voir</a>
+          <a href="/form/edit/<%= form._id %>" class="btn btn-sm btn-warning">Modifier</a>
+          <a href="/form/submissions/<%= form._id %>" class="btn btn-sm btn-info">Soumissions</a>
+        </td>
+      </tr>
+    <% }); %>
+  </tbody>
+</table>

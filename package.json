@@ -1,0 +1,19 @@
+{
+  "name": "form-saas-app",
+  "version": "1.0.0",
+  "description": "Multi‑tenant form generation platform with separate client and company roles",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.6.1",
+    "ejs": "^3.1.9",
+    "express-session": "^1.17.3",
+    "connect-mongo": "^4.6.0",
+    "bcryptjs": "^2.4.3",
+    "multer": "^1.4.5-lts.1",
+    "dotenv": "^16.3.1"
+  }
+}

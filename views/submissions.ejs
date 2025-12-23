@@ -1,0 +1,36 @@
+<% layout('layout') -%>
+<h2>Soumissions pour « <%= form.title %> »</h2>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <% form.fields.forEach(function(field) { %>
+        <th><%= field.name %></th>
+      <% }); %>
+      <% if (form.allowFile) { %><th>Fichier</th><% } %>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (submissions.length === 0) { %>
+      <tr><td colspan="<%= form.fields.length + (form.allowFile ? 2 : 1) %>">Aucune soumission pour le moment.</td></tr>
+    <% } %>
+    <% submissions.forEach(function(sub) { %>
+      <tr>
+        <td><%= sub.submittedAt.toLocaleString() %></td>
+        <% form.fields.forEach(function(field) { %>
+          <td><%= sub.data[field.name] %></td>
+        <% }); %>
+        <% if (form.allowFile) { %>
+          <td>
+            <% if (sub.filePath) { %>
+              <a href="<%= sub.filePath %>" target="_blank">Voir fichier</a>
+            <% } else { %>
+              —
+            <% } %>
+          </td>
+        <% } %>
+      </tr>
+    <% }); %>
+  </tbody>
+</table>
+<a href="/dashboard" class="btn btn-link">Retour au tableau de bord</a>

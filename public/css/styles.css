@@ -1,0 +1,9 @@
+/* Custom CSS overrides */
+body {
+  padding-top: 20px;
+}
+.card img {
+  object-fit: contain;
+  height: 150px;
+  background-color: #f8f9fa;
+}
