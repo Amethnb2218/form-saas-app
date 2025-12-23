@@ -1,9 +1,83 @@
-/* Custom CSS overrides */
-body {
-  padding-top: 20px;
+:root{
+  --glass: rgba(255,255,255,.08);
+  --border: rgba(255,255,255,.16);
 }
-.card img {
-  object-fit: contain;
-  height: 150px;
-  background-color: #f8f9fa;
+
+.app-bg{
+  min-height: 100vh;
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(99,102,241,.35), transparent 60%),
+              radial-gradient(900px 500px at 90% 20%, rgba(16,185,129,.25), transparent 55%),
+              radial-gradient(700px 450px at 40% 90%, rgba(236,72,153,.22), transparent 60%),
+              #0b1020;
 }
+
+.glass-nav{
+  background: rgba(10, 16, 32, .55);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.brand-dot{
+  width: 12px; height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6366f1, #10b981);
+  box-shadow: 0 0 18px rgba(99,102,241,.6);
+}
+
+.card-glass{
+  background: var(--glass);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+}
+
+.hero-title{ letter-spacing: -0.03em; }
+
+.input-glow .form-control,
+.form-control.bg-glass{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.14);
+  color: #fff;
+}
+
+.input-glow .form-control::placeholder{ color: rgba(255,255,255,.45); }
+
+.input-glow .form-control:focus,
+.form-control.bg-glass:focus{
+  border-color: rgba(99,102,241,.55);
+  box-shadow: 0 0 0 .25rem rgba(99,102,241,.18);
+}
+
+.input-glow .form-label, .text-white-80 { color: rgba(255,255,255,.8); }
+.text-white-60 { color: rgba(255,255,255,.6); }
+
+.btn-primary{
+  background: linear-gradient(135deg, #6366f1, #22c55e);
+  border: 0;
+}
+.btn-primary:hover{ filter: brightness(1.05); }
+
+.btn-outline-light{
+  border-color: rgba(255,255,255,.35);
+}
+
+.kpi{
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.table-glass{
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.table-glass table{ margin: 0; }
+.table-glass th, .table-glass td{ color: rgba(255,255,255,.85); }
+.table-glass thead th{ background: rgba(255,255,255,.06); border-bottom: 1px solid rgba(255,255,255,.10); }
+.table-glass tbody tr{ border-color: rgba(255,255,255,.08); }
+
+a{ text-decoration: none; }

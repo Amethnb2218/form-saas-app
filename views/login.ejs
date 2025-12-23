@@ -1,17 +1,28 @@
-<% /* Layout is set globally in app.js via express-ejs-layouts. */ %>
-<h2>Connexion</h2>
-<form action="/login" method="POST" class="mt-3">
-  <div class="mb-3">
-    <label for="username" class="form-label">Nom d'utilisateur</label>
-    <input type="text" class="form-control" id="username" name="username" required />
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-5">
+    <div class="card-glass p-4 p-lg-5 text-white shadow-lg">
+      <h2 class="fw-bold mb-1">Connexion</h2>
+      <p class="text-white-60 mb-4">Heureux de te revoir 👋</p>
+
+      <form class="input-glow" method="POST" action="/login">
+        <div class="mb-3">
+          <label class="form-label">Nom d'utilisateur</label>
+          <input class="form-control form-control-lg" name="username" required />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Mot de passe</label>
+          <input class="form-control form-control-lg" type="password" name="password" required />
+        </div>
+
+        <button class="btn btn-primary btn-lg w-100 rounded-pill">
+          <i class="bi bi-box-arrow-in-right"></i> Se connecter
+        </button>
+      </form>
+
+      <div class="mt-3 text-center">
+        <a class="text-white-80" href="/register">Créer un compte</a>
+      </div>
+    </div>
   </div>
-  <div class="mb-3">
-    <label for="password" class="form-label">Mot de passe</label>
-    <input type="password" class="form-control" id="password" name="password" required />
-  </div>
-  <% if (error) { %>
-    <div class="alert alert-danger"><%= error %></div>
-  <% } %>
-  <button type="submit" class="btn btn-primary">Se connecter</button>
-  <p class="mt-3"><a href="/register">Créer un compte</a></p>
-</form>
+</div>

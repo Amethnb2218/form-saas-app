@@ -49,6 +49,13 @@ app.set('layout', 'layout'); // expects views/layout.ejs by default
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
+// Default locals for all views
+app.use((req, res, next) => {
+  res.locals.title = res.locals.title || 'Form SaaS';
+  res.locals.error = res.locals.error ?? null;
+  next();
+});
+
 // Connect to MongoDB
 mongoose
   .connect(MONGODB_URI, {
@@ -144,7 +151,7 @@ app.get('/', async (req, res) => {
   try {
     const companies = await User.find({ role: 'company' });
     const forms = await Form.find().populate('company');
-    res.render('index', { companies, forms });
+    res.render('index', { title: 'Accueil', companies, forms });
   } catch (err) {
     console.error(err);
     res.status(500).send('Erreur du serveur');
@@ -153,7 +160,7 @@ app.get('/', async (req, res) => {
 
 // Registration page for companies
 app.get('/register', (req, res) => {
-  res.render('register', { error: null });
+  res.render('register', { title: 'Inscription', error: null });
 });
 
 // Handle company registration
@@ -182,7 +189,7 @@ app.post('/register', upload.single('logo'), async (req, res) => {
 
 // Login page
 app.get('/login', (req, res) => {
-  res.render('login', { error: null });
+  res.render('login', { title: 'Connexion', error: null });
 });
 
 // Handle login
@@ -220,7 +227,7 @@ app.get('/logout', (req, res) => {
 app.get('/dashboard', requireCompany, async (req, res) => {
   try {
     const forms = await Form.find({ company: req.session.user.id });
-    res.render('dashboard', { forms });
+    res.render('dashboard', { title: 'Dashboard', forms });
   } catch (err) {
     console.error(err);
     res.status(500).send('Erreur du serveur');
@@ -229,7 +236,7 @@ app.get('/dashboard', requireCompany, async (req, res) => {
 
 // Create new form page
 app.get('/form/new', requireCompany, (req, res) => {
-  res.render('createForm', { error: null });
+  res.render('createForm', { title: 'Nouveau formulaire', error: null });
 });
 
 // Handle new form creation
@@ -274,7 +281,7 @@ app.get('/form/edit/:id', requireCompany, async (req, res) => {
     if (!form || form.company.toString() !== req.session.user.id) {
       return res.status(403).send('Accès refusé');
     }
-    res.render('editForm', { form, error: null });
+    res.render('editForm', { title: 'Modifier formulaire', form, error: null });
   } catch (err) {
     console.error(err);
     res.status(500).send('Erreur du serveur');
@@ -325,7 +332,7 @@ app.get('/form/submissions/:id', requireCompany, async (req, res) => {
       return res.status(403).send('Accès refusé');
     }
     const submissions = await Submission.find({ form: formId });
-    res.render('submissions', { form, submissions });
+    res.render('submissions', { title: 'Soumissions', form, submissions });
   } catch (err) {
     console.error(err);
     res.status(500).send('Erreur du serveur');
@@ -340,7 +347,7 @@ app.get('/form/:id', async (req, res) => {
     if (!form) {
       return res.status(404).send('Formulaire introuvable');
     }
-    res.render('form', { form });
+    res.render('form', { title: form.title || 'Formulaire', form });
   } catch (err) {
     console.error(err);
     res.status(500).send('Erreur du serveur');
@@ -366,7 +373,7 @@ app.post('/form/:id', upload.single('attachment'), async (req, res) => {
     const submission = new Submission({ form: formId, data, filePath });
     await submission.save();
 
-    res.render('thanks');
+    res.render('thanks', { title: 'Merci' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Erreur lors de la soumission du formulaire');
