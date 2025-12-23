@@ -21,6 +21,8 @@ const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const path = require('path');
 const dotenv = require('dotenv');
+// Import express-ejs-layouts to enable the layout() helper
+const expressLayouts = require('express-ejs-layouts');
 
 // Load environment variables from .env if present
 dotenv.config();
@@ -32,6 +34,10 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'change_this_secret';
 
 // Initialise Express app
 const app = express();
+
+// Enable EJS layouts
+app.use(expressLayouts);
+app.set('layout', 'layout');
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, {
