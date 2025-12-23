@@ -126,6 +126,9 @@ app.use(
 // Middleware to expose user to templates
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user;
+  // Defaults used by views/layout.ejs (can be overridden per route via res.render(..., { title, error }))
+  res.locals.title = res.locals.title || 'Form SaaS';
+  res.locals.error = res.locals.error || null;
   next();
 });
 
@@ -144,7 +147,7 @@ app.get('/', async (req, res) => {
   try {
     const companies = await User.find({ role: 'company' });
     const forms = await Form.find().populate('company');
-    res.render('index', { companies, forms });
+    res.render('index', { title: 'Accueil', companies, forms });
   } catch (err) {
     console.error(err);
     res.status(500).send('Erreur du serveur');
@@ -153,19 +156,19 @@ app.get('/', async (req, res) => {
 
 // Registration page for companies
 app.get('/register', (req, res) => {
-  res.render('register', { error: null });
+  res.render('register', { title: 'Inscription', error: null });
 });
 
 // Handle company registration
 app.post('/register', upload.single('logo'), async (req, res) => {
   const { username, password, companyName } = req.body;
   if (!username || !password || !companyName) {
-    return res.render('register', { error: 'Tous les champs sont obligatoires.' });
+    return res.render('register', { title: 'Inscription', error: 'Tous les champs sont obligatoires.' });
   }
   try {
     const existing = await User.findOne({ username });
     if (existing) {
-      return res.render('register', { error: 'Nom d’utilisateur déjà utilisé.' });
+      return res.render('register', { title: 'Inscription', error: 'Nom d’utilisateur déjà utilisé.' });
     }
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(password, saltRounds);
@@ -176,13 +179,13 @@ app.post('/register', upload.single('logo'), async (req, res) => {
     res.redirect('/login');
   } catch (err) {
     console.error(err);
-    res.render('register', { error: 'Erreur lors de l’inscription.' });
+    res.render('register', { title: 'Inscription', error: 'Erreur lors de l’inscription.' });
   }
 });
 
 // Login page
 app.get('/login', (req, res) => {
-  res.render('login', { error: null });
+  res.render('login', { title: 'Connexion', error: null });
 });
 
 // Handle login
@@ -191,11 +194,11 @@ app.post('/login', async (req, res) => {
   try {
     const user = await User.findOne({ username });
     if (!user) {
-      return res.render('login', { error: 'Identifiants invalides.' });
+      return res.render('login', { title: 'Connexion', error: 'Identifiants invalides.' });
     }
     const match = await bcrypt.compare(password, user.passwordHash);
     if (!match) {
-      return res.render('login', { error: 'Identifiants invalides.' });
+      return res.render('login', { title: 'Connexion', error: 'Identifiants invalides.' });
     }
     req.session.user = {
       id: user._id.toString(),
@@ -205,7 +208,7 @@ app.post('/login', async (req, res) => {
     res.redirect('/dashboard');
   } catch (err) {
     console.error(err);
-    res.render('login', { error: 'Erreur lors de la connexion.' });
+    res.render('login', { title: 'Connexion', error: 'Erreur lors de la connexion.' });
   }
 });
 
@@ -220,7 +223,7 @@ app.get('/logout', (req, res) => {
 app.get('/dashboard', requireCompany, async (req, res) => {
   try {
     const forms = await Form.find({ company: req.session.user.id });
-    res.render('dashboard', { forms });
+    res.render('dashboard', { title: 'Tableau de bord', forms });
   } catch (err) {
     console.error(err);
     res.status(500).send('Erreur du serveur');
@@ -229,14 +232,14 @@ app.get('/dashboard', requireCompany, async (req, res) => {
 
 // Create new form page
 app.get('/form/new', requireCompany, (req, res) => {
-  res.render('createForm', { error: null });
+  res.render('createForm', { title: 'Nouveau formulaire', error: null });
 });
 
 // Handle new form creation
 app.post('/form/new', requireCompany, async (req, res) => {
   const { title, fieldNames, fieldTypes, template, allowFile } = req.body;
   if (!title) {
-    return res.render('createForm', { error: 'Le titre est obligatoire.' });
+    return res.render('createForm', { title: 'Nouveau formulaire', error: 'Le titre est obligatoire.' });
   }
   try {
     const fields = [];
@@ -262,7 +265,7 @@ app.post('/form/new', requireCompany, async (req, res) => {
     res.redirect('/dashboard');
   } catch (err) {
     console.error(err);
-    res.render('createForm', { error: 'Erreur lors de la création du formulaire.' });
+    res.render('createForm', { title: 'Nouveau formulaire', error: 'Erreur lors de la création du formulaire.' });
   }
 });
 
@@ -274,7 +277,7 @@ app.get('/form/edit/:id', requireCompany, async (req, res) => {
     if (!form || form.company.toString() !== req.session.user.id) {
       return res.status(403).send('Accès refusé');
     }
-    res.render('editForm', { form, error: null });
+    res.render('editForm', { title: 'Modifier le formulaire', form, error: null });
   } catch (err) {
     console.error(err);
     res.status(500).send('Erreur du serveur');
@@ -325,7 +328,7 @@ app.get('/form/submissions/:id', requireCompany, async (req, res) => {
       return res.status(403).send('Accès refusé');
     }
     const submissions = await Submission.find({ form: formId });
-    res.render('submissions', { form, submissions });
+    res.render('submissions', { title: 'Soumissions', form, submissions });
   } catch (err) {
     console.error(err);
     res.status(500).send('Erreur du serveur');
@@ -340,7 +343,7 @@ app.get('/form/:id', async (req, res) => {
     if (!form) {
       return res.status(404).send('Formulaire introuvable');
     }
-    res.render('form', { form });
+    res.render('form', { title: form.title || 'Formulaire', form });
   } catch (err) {
     console.error(err);
     res.status(500).send('Erreur du serveur');
@@ -366,7 +369,7 @@ app.post('/form/:id', upload.single('attachment'), async (req, res) => {
     const submission = new Submission({ form: formId, data, filePath });
     await submission.save();
 
-    res.render('thanks');
+    res.render('thanks', { title: 'Merci' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Erreur lors de la soumission du formulaire');
