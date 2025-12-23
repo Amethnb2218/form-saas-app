@@ -1,4 +1,4 @@
-// Main entry point for the multi‑tenant form SaaS application.
+// Main entry point for the multi-tenant form SaaS application.
 //
 // This Express application uses MongoDB (via Mongoose) to store users,
 // forms and submissions. There are two primary roles:
@@ -21,7 +21,10 @@ const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const path = require('path');
 const dotenv = require('dotenv');
-// Import express-ejs-layouts to enable the layout() helper
+
+// Use express-ejs-layouts to support layouts in EJS templates.
+// This middleware adds a `layout()` helper in EJS templates and can wrap
+// rendered views with the default layout configured via `app.set('layout', ...)`.
 const expressLayouts = require('express-ejs-layouts');
 
 // Load environment variables from .env if present
@@ -35,19 +38,29 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'change_this_secret';
 // Initialise Express app
 const app = express();
 
-// Enable EJS layouts
+// View engine + layouts
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 app.use(expressLayouts);
-app.set('layout', 'layout');
+app.set('layout', 'layout'); // expects views/layout.ejs by default
+
+// Middleware
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true }));
 
 // Connect to MongoDB
-mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => {
-  console.log('Connected to MongoDB');
-}).catch(err => {
-  console.error('MongoDB connection error:', err);
-});
+mongoose
+  .connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+  });
 
 // Define Mongoose schemas and models
 const userSchema = new mongoose.Schema({
@@ -86,33 +99,29 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + '-' + file.originalname);
   }
 });
 const upload = multer({ storage: storage });
 
-// Middleware
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
-
 // Session configuration
-app.use(session({
-  secret: SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: MONGODB_URI,
-    collectionName: 'sessions'
-  }),
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 24, // 1 day
-    httpOnly: true
-    // In production, set secure: true for HTTPS
-  }
-}));
+app.use(
+  session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: MONGODB_URI,
+      collectionName: 'sessions'
+    }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      httpOnly: true
+      // In production, set secure: true for HTTPS
+    }
+  })
+);
 
 // Middleware to expose user to templates
 app.use((req, res, next) => {
@@ -133,9 +142,7 @@ function requireCompany(req, res, next) {
 // Home page: list all companies and their public forms
 app.get('/', async (req, res) => {
   try {
-    // Fetch companies
     const companies = await User.find({ role: 'company' });
-    // Fetch forms grouped by company
     const forms = await Form.find().populate('company');
     res.render('index', { companies, forms });
   } catch (err) {
@@ -163,6 +170,7 @@ app.post('/register', upload.single('logo'), async (req, res) => {
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(password, saltRounds);
     const logoPath = req.file ? '/uploads/' + req.file.filename : undefined;
+
     const user = new User({ username, passwordHash, companyName, logoPath });
     await user.save();
     res.redirect('/login');
@@ -189,7 +197,11 @@ app.post('/login', async (req, res) => {
     if (!match) {
       return res.render('login', { error: 'Identifiants invalides.' });
     }
-    req.session.user = { id: user._id.toString(), role: user.role, companyName: user.companyName };
+    req.session.user = {
+      id: user._id.toString(),
+      role: user.role,
+      companyName: user.companyName
+    };
     res.redirect('/dashboard');
   } catch (err) {
     console.error(err);
@@ -228,7 +240,6 @@ app.post('/form/new', requireCompany, async (req, res) => {
   }
   try {
     const fields = [];
-    // fieldNames and fieldTypes are arrays if multiple fields, or strings if one field
     if (Array.isArray(fieldNames)) {
       for (let i = 0; i < fieldNames.length; i++) {
         if (fieldNames[i]) {
@@ -238,6 +249,7 @@ app.post('/form/new', requireCompany, async (req, res) => {
     } else if (fieldNames) {
       fields.push({ name: fieldNames, type: fieldTypes || 'text' });
     }
+
     const form = new Form({
       company: req.session.user.id,
       title,
@@ -245,6 +257,7 @@ app.post('/form/new', requireCompany, async (req, res) => {
       template: template || 'default',
       allowFile: allowFile === 'on'
     });
+
     await form.save();
     res.redirect('/dashboard');
   } catch (err) {
@@ -277,8 +290,9 @@ app.post('/form/edit/:id', requireCompany, async (req, res) => {
     if (!form || form.company.toString() !== req.session.user.id) {
       return res.status(403).send('Accès refusé');
     }
+
     form.title = title;
-    // Rebuild fields array
+
     const fields = [];
     if (Array.isArray(fieldNames)) {
       for (let i = 0; i < fieldNames.length; i++) {
@@ -289,9 +303,11 @@ app.post('/form/edit/:id', requireCompany, async (req, res) => {
     } else if (fieldNames) {
       fields.push({ name: fieldNames, type: fieldTypes || 'text' });
     }
+
     form.fields = fields;
     form.template = template || 'default';
     form.allowFile = allowFile === 'on';
+
     await form.save();
     res.redirect('/dashboard');
   } catch (err) {
@@ -339,16 +355,17 @@ app.post('/form/:id', upload.single('attachment'), async (req, res) => {
     if (!form) {
       return res.status(404).send('Formulaire introuvable');
     }
-    // Build data object from form fields
+
     const data = {};
     form.fields.forEach(field => {
       const value = req.body[field.name] || '';
       data[field.name] = value;
     });
-    // Save submission
+
     const filePath = req.file ? '/uploads/' + req.file.filename : undefined;
     const submission = new Submission({ form: formId, data, filePath });
     await submission.save();
+
     res.render('thanks');
   } catch (err) {
     console.error(err);
