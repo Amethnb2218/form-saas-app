@@ -3,27 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<<<<<<< HEAD
 
-  <title><%= typeof title !== 'undefined' ? title : 'Form SaaS' %></title>
+  <title><%= (typeof title !== 'undefined' && title) ? title : 'Form SaaS' %></title>
 
   <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-
-  <!-- Custom CSS -->
-=======
-  <title><%= (typeof title !== 'undefined' && title) ? title : 'Form SaaS' %></title>
-  <!-- Use Bootstrap CSS from CDN for a modern interface -->
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
     rel="stylesheet"
     integrity="sha384-MKV+F0Ekfppfjw0Ve01dedVqNd3KmEYv67zZnkuMe3k2hRUJxKk3p5YbW0i0S7f9"
     crossorigin="anonymous"
   />
->>>>>>> b4c3e608e80e8642e7a0286b89bc2c4aacce0208
+
+  <!-- Icons -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 
@@ -52,7 +49,6 @@
       </div>
     </div>
   </nav>
-<<<<<<< HEAD
 
   <main class="container py-4 py-lg-5">
     <% if (typeof error !== 'undefined' && error) { %>
@@ -60,11 +56,6 @@
         <i class="bi bi-exclamation-triangle-fill"></i>
         <div><%= error %></div>
       </div>
-=======
-  <div class="container">
-    <% if (typeof error !== 'undefined' && error) { %>
-      <div class="alert alert-danger"><%= error %></div>
->>>>>>> b4c3e608e80e8642e7a0286b89bc2c4aacce0208
     <% } %>
 
     <%- body %>
