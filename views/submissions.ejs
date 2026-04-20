@@ -1,9 +1,14 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <div class="text-white">
     <h2 class="fw-bold mb-1">Soumissions</h2>
-    <div class="text-white-60"><%= form.title %></div>
+    <div class="text-white-60"><%= form.title %> • <%= totalSubmissions %> reponse(s)</div>
   </div>
-  <a href="/dashboard" class="btn btn-outline-light rounded-pill"><i class="bi bi-arrow-left"></i> Retour</a>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-light rounded-pill" href="/form/submissions/<%= form._id %>/export.csv">
+      <i class="bi bi-download"></i> Export CSV
+    </a>
+    <a href="/dashboard" class="btn btn-outline-light rounded-pill"><i class="bi bi-arrow-left"></i> Retour</a>
+  </div>
 </div>
 
 <div class="card-glass p-3 p-lg-4 text-white shadow-lg table-glass">
@@ -12,8 +17,9 @@
       <thead>
         <tr>
           <th>Date</th>
-          <th>Données</th>
+          <th>Donnees</th>
           <th>Fichier</th>
+          <th>Source</th>
         </tr>
       </thead>
       <tbody>
@@ -26,13 +32,17 @@
                 <% if (s.filePath) { %>
                   <a class="btn btn-sm btn-outline-light" href="<%= s.filePath %>" target="_blank"><i class="bi bi-paperclip"></i> Voir</a>
                 <% } else { %>
-                  <span class="text-white-60">—</span>
+                  <span class="text-white-60">-</span>
                 <% } %>
+              </td>
+              <td>
+                <div class="small text-white-60"><%= s.ipAddress || '-' %></div>
+                <div class="small text-white-60"><%= s.userAgent || '-' %></div>
               </td>
             </tr>
           <% }) %>
         <% } else { %>
-          <tr><td colspan="3" class="text-white-60">Aucune soumission pour le moment.</td></tr>
+          <tr><td colspan="4" class="text-white-60">Aucune soumission pour le moment.</td></tr>
         <% } %>
       </tbody>
     </table>

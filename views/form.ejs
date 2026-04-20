@@ -1,32 +1,72 @@
 <div class="row justify-content-center">
-  <div class="col-lg-9 col-xl-8">
+  <div class="col-xl-9">
     <div class="card-glass p-4 p-lg-5 text-white shadow-lg">
-      <h2 class="fw-bold mb-1"><%= form.title %></h2>
-      <p class="text-white-60 mb-4">Merci de remplir ce formulaire.</p>
+      <% if (isPreview) { %>
+        <div class="alert alert-warning rounded-4 d-flex align-items-center gap-2 mb-4" role="alert">
+          <i class="bi bi-eye"></i>
+          <div>Mode apercu: ce formulaire n'est pas publie.</div>
+        </div>
+      <% } %>
 
-      <form class="input-glow" method="POST" action="/form/<%= form._id %>" enctype="multipart/form-data">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+        <div>
+          <h2 class="fw-bold mb-1"><%= form.title %></h2>
+          <% if (form.description) { %>
+            <p class="text-white-60 mb-0"><%= form.description %></p>
+          <% } %>
+        </div>
+        <div class="small text-white-60 text-end">
+          <div><i class="bi bi-building"></i> <%= form.company?.companyName || 'Entreprise' %></div>
+          <div><i class="bi bi-tag"></i> <%= form.category || 'General' %></div>
+        </div>
+      </div>
+
+      <form class="input-glow" method="POST" action="<%= publicAction %>" enctype="multipart/form-data">
         <% (form.fields || []).forEach(field => { %>
           <div class="mb-3">
-            <label class="form-label"><%= field.label %></label>
+            <label class="form-label">
+              <%= field.label %>
+              <% if (field.required) { %><span class="text-danger">*</span><% } %>
+            </label>
 
             <% if (field.type === 'textarea') { %>
-              <textarea class="form-control form-control-lg" name="<%= field.name %>" <%= field.required ? 'required' : '' %>></textarea>
+              <textarea
+                class="form-control form-control-lg"
+                name="<%= field.name %>"
+                placeholder="<%= field.placeholder || '' %>"
+                <%= field.required ? 'required' : '' %>
+              ></textarea>
+            <% } else if (field.type === 'checkbox') { %>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="<%= field.name %>" id="field_<%= field.name %>" <%= field.required ? 'required' : '' %> />
+                <label class="form-check-label" for="field_<%= field.name %>">Oui</label>
+              </div>
             <% } else { %>
-              <input class="form-control form-control-lg" type="<%= field.type || 'text' %>" name="<%= field.name %>" <%= field.required ? 'required' : '' %> />
+              <input
+                class="form-control form-control-lg"
+                type="<%= field.type || 'text' %>"
+                name="<%= field.name %>"
+                placeholder="<%= field.placeholder || '' %>"
+                <%= field.required ? 'required' : '' %>
+              />
             <% } %>
 
+            <% if (field.helpText) { %>
+              <div class="form-text text-white-60"><%= field.helpText %></div>
+            <% } %>
           </div>
         <% }) %>
 
         <% if (form.allowFileUpload) { %>
           <div class="mb-3">
-            <label class="form-label">Fichier</label>
-            <input class="form-control form-control-lg" type="file" name="file" />
+            <label class="form-label">Piece jointe (optionnel)</label>
+            <input class="form-control form-control-lg" type="file" name="file" accept="image/png,image/jpeg,application/pdf" />
+            <div class="form-text text-white-60">Formats autorises: JPG, PNG, PDF.</div>
           </div>
         <% } %>
 
         <button class="btn btn-primary btn-lg rounded-pill px-4">
-          <i class="bi bi-send"></i> Envoyer
+          <i class="bi bi-send"></i> Envoyer la reponse
         </button>
       </form>
     </div>

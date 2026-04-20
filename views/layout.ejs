@@ -10,13 +10,23 @@
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
     rel="stylesheet"
-    integrity="sha384-MKV+F0Ekfppfjw0Ve01dedVqNd3KmEYv67zZnkuMe3k2hRUJxKk3p5YbW0i0S7f9"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
     crossorigin="anonymous"
   />
 
   <!-- Icons -->
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Typography -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/@fontsource/public-sans@5.1.1/index.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://cdn.jsdelivr.net/npm/@fontsource/sora@5.1.1/index.min.css"
     rel="stylesheet"
   />
 
@@ -38,13 +48,33 @@
 
       <div id="nav" class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+          <% if (httpsEnabled) { %>
+            <li class="nav-item">
+              <span class="secure-chip"><i class="bi bi-shield-lock"></i> HTTPS</span>
+            </li>
+          <% } %>
           <li class="nav-item"><a class="nav-link" href="/"><i class="bi bi-grid-1x2"></i> Accueil</a></li>
-          <li class="nav-item"><a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right"></i> Connexion</a></li>
-          <li class="nav-item">
-            <a class="btn btn-primary rounded-pill px-3" href="/register">
-              <i class="bi bi-person-plus"></i> Inscription
-            </a>
-          </li>
+          <% if (currentUser) { %>
+            <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="/settings"><i class="bi bi-gear"></i> Parametres</a></li>
+            <li class="nav-item">
+              <span class="company-chip"><i class="bi bi-building"></i> <%= currentUser.companyName %></span>
+            </li>
+            <li class="nav-item">
+              <form method="POST" action="/logout" class="d-inline">
+                <button class="btn btn-outline-light rounded-pill px-3" type="submit">
+                  <i class="bi bi-box-arrow-right"></i> Deconnexion
+                </button>
+              </form>
+            </li>
+          <% } else { %>
+            <li class="nav-item"><a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right"></i> Connexion</a></li>
+            <li class="nav-item">
+              <a class="btn btn-primary rounded-pill px-3" href="/register">
+                <i class="bi bi-person-plus"></i> Inscription
+              </a>
+            </li>
+          <% } %>
         </ul>
       </div>
     </div>
@@ -52,7 +82,7 @@
 
   <main class="container py-4 py-lg-5">
     <% if (typeof error !== 'undefined' && error) { %>
-      <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center gap-2" role="alert">
+      <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center gap-2 rounded-4" role="alert">
         <i class="bi bi-exclamation-triangle-fill"></i>
         <div><%= error %></div>
       </div>
@@ -67,6 +97,10 @@
     </div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+    crossorigin="anonymous"
+  ></script>
 </body>
 </html>

@@ -1,10 +1,20 @@
 <div class="row justify-content-center">
-  <div class="col-lg-7">
+  <div class="col-lg-8">
     <div class="card-glass p-4 p-lg-5 text-white shadow-lg text-center">
-      <div class="display-6 mb-2">✅</div>
-      <h2 class="fw-bold mb-2">Merci !</h2>
-      <p class="text-white-60 mb-4">Votre réponse a bien été enregistrée.</p>
-      <a class="btn btn-primary rounded-pill px-4" href="/"><i class="bi bi-house"></i> Retour à l’accueil</a>
+      <div class="display-6 mb-2"><i class="bi bi-check2-circle"></i></div>
+      <h2 class="fw-bold mb-2">Merci pour votre reponse</h2>
+      <p class="text-white-60 mb-4">
+        Votre soumission a bien ete enregistree.
+        <% if (formTitle) { %>
+          <br />Formulaire: <strong><%= formTitle %></strong>
+        <% } %>
+        <% if (companyName) { %>
+          <br />Organisation: <strong><%= companyName %></strong>
+        <% } %>
+      </p>
+      <div class="d-flex justify-content-center gap-2 flex-wrap">
+        <a class="btn btn-primary rounded-pill px-4" href="/"><i class="bi bi-house"></i> Retour a l'accueil</a>
+      </div>
     </div>
   </div>
 </div>

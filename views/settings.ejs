@@ -1,0 +1,67 @@
+<div class="row justify-content-center">
+  <div class="col-xl-9">
+    <div class="card-glass p-4 p-lg-5 text-white shadow-lg">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h2 class="fw-bold mb-1">Parametres entreprise</h2>
+          <div class="text-white-60">Gere l'identite de ton espace et la securite du compte.</div>
+        </div>
+        <a href="/dashboard" class="btn btn-outline-light rounded-pill"><i class="bi bi-arrow-left"></i> Retour</a>
+      </div>
+
+      <% if (saved) { %>
+        <div class="alert alert-success rounded-4 border-0 mb-4" role="alert">
+          <i class="bi bi-check-circle"></i> Parametres enregistres avec succes.
+        </div>
+      <% } %>
+
+      <form class="input-glow" method="POST" action="/settings" enctype="multipart/form-data">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nom d'utilisateur</label>
+            <input class="form-control form-control-lg" value="<%= user.username %>" disabled />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Nom de l'entreprise</label>
+            <input class="form-control form-control-lg" name="companyName" value="<%= user.companyName %>" required />
+          </div>
+          <div class="col-12">
+            <label class="form-label">Logo entreprise (optionnel)</label>
+            <input class="form-control form-control-lg" type="file" name="logo" accept="image/png,image/jpeg" />
+            <div class="form-text text-white-60">Formats autorises: JPG, PNG.</div>
+          </div>
+
+          <div class="col-12 pt-2">
+            <h5 class="fw-bold mb-1">Changer le mot de passe</h5>
+            <div class="text-white-60 small">Laisse ces champs vides si tu ne veux pas le modifier.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Mot de passe actuel</label>
+            <input class="form-control form-control-lg" type="password" name="currentPassword" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Nouveau mot de passe</label>
+            <input
+              class="form-control form-control-lg"
+              type="password"
+              name="newPassword"
+              minlength="8"
+              pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}"
+              title="Minimum 8 caracteres avec au moins 1 majuscule, 1 minuscule et 1 chiffre."
+            />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Confirmation</label>
+            <input class="form-control form-control-lg" type="password" name="confirmPassword" />
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <button class="btn btn-primary btn-lg rounded-pill px-4" type="submit">
+            <i class="bi bi-save2"></i> Enregistrer les parametres
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

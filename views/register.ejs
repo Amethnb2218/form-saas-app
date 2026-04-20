@@ -16,8 +16,13 @@
           </div>
           <div class="col-12">
             <label class="form-label">Mot de passe</label>
-            <input class="form-control form-control-lg" id="password" type="password" name="password" required />
-            <div class="form-text text-white-60">Utilise un mot de passe fort.</div>
+            <input class="form-control form-control-lg" id="password" type="password" name="password" minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}" title="Minimum 8 caracteres avec au moins 1 majuscule, 1 minuscule et 1 chiffre." required />
+            <div class="form-text text-white-60">Minimum 8 caracteres avec au moins 1 majuscule, 1 minuscule et 1 chiffre.</div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Logo (optionnel)</label>
+            <input class="form-control form-control-lg" id="logo" type="file" name="logo" accept="image/png,image/jpeg" />
+            <div class="form-text text-white-60">Formats autorises: JPG, PNG.</div>
           </div>
         </div>
 

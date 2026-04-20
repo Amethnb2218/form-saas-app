@@ -1,5 +1,5 @@
 <div class="row justify-content-center">
-  <div class="col-lg-9 col-xl-8">
+  <div class="col-xl-10">
     <div class="card-glass p-4 p-lg-5 text-white shadow-lg">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
@@ -10,27 +10,57 @@
       </div>
 
       <form class="input-glow" method="POST" action="/form/edit/<%= form._id %>">
-        <div class="mb-3">
-          <label class="form-label">Titre</label>
-          <input class="form-control form-control-lg" name="title" value="<%= form.title %>" required />
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label">Titre</label>
+            <input class="form-control form-control-lg" name="title" value="<%= formData.title %>" required />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Slug public</label>
+            <input class="form-control form-control-lg" name="slug" value="<%= formData.slug %>" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Categorie</label>
+            <select class="form-select form-select-lg" name="category">
+              <% categories.forEach(category => { %>
+                <option value="<%= category %>" <%= formData.category === category ? 'selected' : '' %>><%= category %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Statut</label>
+            <select class="form-select form-select-lg" name="status">
+              <option value="published" <%= formData.status === 'published' ? 'selected' : '' %>>Publie</option>
+              <option value="draft" <%= formData.status === 'draft' ? 'selected' : '' %>>Brouillon</option>
+              <option value="archived" <%= formData.status === 'archived' ? 'selected' : '' %>>Archive</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Upload de fichier</label>
+            <select class="form-select form-select-lg" name="allowFileUpload">
+              <option value="false" <%= !formData.allowFileUpload ? 'selected' : '' %>>Non</option>
+              <option value="true" <%= formData.allowFileUpload ? 'selected' : '' %>>Oui</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea class="form-control bg-glass" rows="3" name="description"><%= formData.description %></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Champs (JSON)</label>
+            <textarea class="form-control bg-glass" rows="12" name="fieldsJson" required><%= formData.fieldsJson %></textarea>
+            <div class="form-text text-white-60">Chaque champ doit contenir name, label, type, required et peut avoir placeholder/helpText.</div>
+          </div>
         </div>
 
-        <div class="mb-3">
-          <label class="form-label">Autoriser l'upload de fichier ?</label>
-          <select class="form-control form-control-lg" name="allowFileUpload">
-            <option value="false" <%= !form.allowFileUpload ? 'selected' : '' %>>Non</option>
-            <option value="true" <%= form.allowFileUpload ? 'selected' : '' %>>Oui</option>
-          </select>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <button class="btn btn-primary btn-lg rounded-pill px-4">
+            <i class="bi bi-save2"></i> Enregistrer
+          </button>
+          <a target="_blank" href="<%= formData.slug ? ('/f/' + formData.slug) : ('/form/' + form._id) %>" class="btn btn-outline-light btn-lg rounded-pill px-4">
+            <i class="bi bi-box-arrow-up-right"></i> Voir le formulaire
+          </a>
         </div>
-
-        <div class="mb-3">
-          <label class="form-label">Champs (JSON)</label>
-          <textarea class="form-control bg-glass" rows="10" name="fieldsJson"><%= JSON.stringify(form.fields || [], null, 2) %></textarea>
-        </div>
-
-        <button class="btn btn-primary btn-lg rounded-pill px-4">
-          <i class="bi bi-save2"></i> Enregistrer
-        </button>
       </form>
     </div>
   </div>

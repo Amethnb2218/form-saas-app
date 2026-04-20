@@ -1,37 +1,68 @@
 <div class="row justify-content-center">
-  <div class="col-lg-9 col-xl-8">
+  <div class="col-xl-10">
     <div class="card-glass p-4 p-lg-5 text-white shadow-lg">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
           <h2 class="fw-bold mb-1">Nouveau formulaire</h2>
-          <div class="text-white-60">Configure le formulaire pour ton entreprise.</div>
+          <div class="text-white-60">Configure un formulaire pret pour un usage professionnel.</div>
         </div>
         <a href="/dashboard" class="btn btn-outline-light rounded-pill"><i class="bi bi-arrow-left"></i> Retour</a>
       </div>
 
       <form class="input-glow" method="POST" action="/form/new">
-        <div class="mb-3">
-          <label class="form-label">Titre</label>
-          <input class="form-control form-control-lg" name="title" placeholder="Ex: Demande de stage" required />
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label">Titre</label>
+            <input class="form-control form-control-lg" name="title" value="<%= formData.title %>" placeholder="Ex: Demande de collaboration" required />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Slug public (optionnel)</label>
+            <input class="form-control form-control-lg" name="slug" value="<%= formData.slug %>" placeholder="demande-collaboration" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Categorie</label>
+            <select class="form-select form-select-lg" name="category">
+              <% categories.forEach(category => { %>
+                <option value="<%= category %>" <%= formData.category === category ? 'selected' : '' %>><%= category %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Statut</label>
+            <select class="form-select form-select-lg" name="status">
+              <option value="published" <%= formData.status === 'published' ? 'selected' : '' %>>Publie</option>
+              <option value="draft" <%= formData.status === 'draft' ? 'selected' : '' %>>Brouillon</option>
+              <option value="archived" <%= formData.status === 'archived' ? 'selected' : '' %>>Archive</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Upload de fichier</label>
+            <select class="form-select form-select-lg" name="allowFileUpload">
+              <option value="false" <%= !formData.allowFileUpload ? 'selected' : '' %>>Non</option>
+              <option value="true" <%= formData.allowFileUpload ? 'selected' : '' %>>Oui</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea class="form-control bg-glass" rows="3" name="description" placeholder="Objectif du formulaire, public cible, informations attendues..."><%= formData.description %></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Champs (JSON)</label>
+            <textarea class="form-control bg-glass" rows="12" name="fieldsJson" required><%= formData.fieldsJson %></textarea>
+            <div class="form-text text-white-60">
+              Format attendu: tableau JSON avec name, label, type, required, placeholder, helpText.
+            </div>
+          </div>
         </div>
 
-        <div class="mb-3">
-          <label class="form-label">Autoriser l'upload de fichier ?</label>
-          <select class="form-control form-control-lg" name="allowFileUpload">
-            <option value="false">Non</option>
-            <option value="true">Oui</option>
-          </select>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <button class="btn btn-primary btn-lg rounded-pill px-4">
+            <i class="bi bi-check2-circle"></i> Creer le formulaire
+          </button>
+          <a href="/dashboard" class="btn btn-outline-light btn-lg rounded-pill px-4">
+            <i class="bi bi-x-circle"></i> Annuler
+          </a>
         </div>
-
-        <div class="mb-3">
-          <label class="form-label">Champs (JSON)</label>
-          <textarea class="form-control bg-glass" rows="8" name="fieldsJson" placeholder='[{"label":"Nom","type":"text","required":true}]'></textarea>
-          <div class="form-text text-white-60">Astuce: garde un format JSON valide.</div>
-        </div>
-
-        <button class="btn btn-primary btn-lg rounded-pill px-4">
-          <i class="bi bi-check2-circle"></i> Créer
-        </button>
       </form>
     </div>
   </div>

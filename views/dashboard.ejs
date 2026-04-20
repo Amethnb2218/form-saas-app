@@ -1,56 +1,138 @@
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <div>
-    <h2 class="text-white fw-bold mb-1">Dashboard</h2>
-    <div class="text-white-60">Gère tes formulaires et consulte les soumissions.</div>
+<section class="dashboard-page">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+      <h2 class="text-white fw-bold mb-1">Tableau de bord</h2>
+      <div class="text-white-60">Pilote tes formulaires, leur statut et les soumissions en temps reel.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/form/new" class="btn btn-primary rounded-pill px-4">
+        <i class="bi bi-plus-circle"></i> Nouveau formulaire
+      </a>
+      <a href="/settings" class="btn btn-outline-light rounded-pill px-4">
+        <i class="bi bi-gear"></i> Parametres
+      </a>
+      <form method="POST" action="/logout" class="d-inline">
+        <button type="submit" class="btn btn-outline-light rounded-pill px-4">
+          <i class="bi bi-box-arrow-right"></i> Deconnexion
+        </button>
+      </form>
+    </div>
   </div>
-  <div class="d-flex gap-2">
-    <a href="/form/new" class="btn btn-primary rounded-pill px-4">
-      <i class="bi bi-plus-circle"></i> Nouveau formulaire
-    </a>
-    <a href="/logout" class="btn btn-outline-light rounded-pill px-4">
-      <i class="bi bi-box-arrow-right"></i> Déconnexion
-    </a>
-  </div>
-</div>
 
-<div class="card-glass p-3 p-lg-4 text-white shadow-lg table-glass">
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <h5 class="fw-bold mb-0"><i class="bi bi-ui-checks-grid"></i> Mes formulaires</h5>
-    <span class="badge rounded-pill text-bg-light"><%= (forms && forms.length) ? forms.length : 0 %></span>
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+      <div class="metric-tile h-100">
+        <div class="metric-value"><%= metrics.totalForms %></div>
+        <div class="metric-label">Formulaires total</div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="metric-tile h-100">
+        <div class="metric-value"><%= metrics.publishedForms %></div>
+        <div class="metric-label">Publies</div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="metric-tile h-100">
+        <div class="metric-value"><%= metrics.draftForms %></div>
+        <div class="metric-label">Brouillons</div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="metric-tile h-100">
+        <div class="metric-value"><%= metrics.totalSubmissions %></div>
+        <div class="metric-label">Soumissions</div>
+      </div>
+    </div>
   </div>
 
-  <div class="table-responsive">
-    <table class="table align-middle">
-      <thead>
-        <tr>
-          <th>Titre</th>
-          <th>Champs</th>
-          <th>Fichier ?</th>
-          <th class="text-end">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (forms && forms.length) { %>
-          <% forms.forEach(form => { %>
-            <tr>
-              <td class="fw-semibold"><%= form.title %></td>
-              <td><%= form.fields ? form.fields.length : 0 %></td>
-              <td><%= form.allowFileUpload ? 'Oui' : 'Non' %></td>
-              <td class="text-end">
-                <div class="btn-group">
-                  <a class="btn btn-sm btn-outline-light" href="/form/edit/<%= form._id %>"><i class="bi bi-pencil"></i></a>
-                  <a class="btn btn-sm btn-outline-light" href="/form/submissions/<%= form._id %>"><i class="bi bi-inbox"></i></a>
-                  <a class="btn btn-sm btn-outline-light" target="_blank" href="/form/<%= form._id %>"><i class="bi bi-box-arrow-up-right"></i></a>
-                </div>
-              </td>
-            </tr>
-          <% }) %>
-        <% } else { %>
+  <div class="card-glass p-3 p-lg-4 text-white shadow-lg table-glass">
+    <form class="row g-2 align-items-end mb-3" method="GET" action="/dashboard">
+      <div class="col-md-7">
+        <label class="form-label mb-1">Recherche</label>
+        <input
+          class="form-control"
+          name="q"
+          value="<%= filters.q || '' %>"
+          placeholder="Titre, categorie, slug..."
+        />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label mb-1">Statut</label>
+        <select class="form-select" name="status">
+          <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>Tous</option>
+          <option value="published" <%= filters.status === 'published' ? 'selected' : '' %>>Publie</option>
+          <option value="draft" <%= filters.status === 'draft' ? 'selected' : '' %>>Brouillon</option>
+          <option value="archived" <%= filters.status === 'archived' ? 'selected' : '' %>>Archive</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-outline-light" type="submit"><i class="bi bi-search"></i> Filtrer</button>
+      </div>
+    </form>
+
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h5 class="fw-bold mb-0"><i class="bi bi-ui-checks-grid"></i> Mes formulaires</h5>
+      <span class="badge rounded-pill text-bg-light"><%= (forms && forms.length) ? forms.length : 0 %></span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
           <tr>
-            <td colspan="4" class="text-white-60">Aucun formulaire. Crée ton premier formulaire.</td>
+            <th>Titre</th>
+            <th>Categorie</th>
+            <th>Statut</th>
+            <th>Reponses</th>
+            <th>Lien public</th>
+            <th class="text-end">Actions</th>
           </tr>
-        <% } %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% if (forms && forms.length) { %>
+            <% forms.forEach(form => { %>
+              <tr>
+                <td>
+                  <div class="fw-semibold"><%= form.title %></div>
+                  <div class="small text-white-60">/<%= form.slug || form._id %></div>
+                </td>
+                <td><%= form.category || 'General' %></td>
+                <td>
+                  <form method="POST" action="/form/status/<%= form._id %>">
+                    <select class="form-select form-select-sm" name="status" onchange="this.form.submit()">
+                      <option value="published" <%= form.status === 'published' ? 'selected' : '' %>>Publie</option>
+                      <option value="draft" <%= form.status === 'draft' ? 'selected' : '' %>>Brouillon</option>
+                      <option value="archived" <%= form.status === 'archived' ? 'selected' : '' %>>Archive</option>
+                    </select>
+                  </form>
+                </td>
+                <td><%= form.submissionCount || 0 %></td>
+                <td>
+                  <a class="btn btn-sm btn-outline-light" target="_blank" href="<%= form.slug ? ('/f/' + form.slug) : ('/form/' + form._id) %>">
+                    <i class="bi bi-box-arrow-up-right"></i> Ouvrir
+                  </a>
+                </td>
+                <td class="text-end">
+                  <div class="btn-group">
+                    <a class="btn btn-sm btn-outline-light" href="/form/edit/<%= form._id %>"><i class="bi bi-pencil"></i></a>
+                    <a class="btn btn-sm btn-outline-light" href="/form/submissions/<%= form._id %>"><i class="bi bi-inbox"></i></a>
+                    <form method="POST" action="/form/duplicate/<%= form._id %>" class="d-inline">
+                      <button class="btn btn-sm btn-outline-light" type="submit" title="Dupliquer"><i class="bi bi-copy"></i></button>
+                    </form>
+                    <form method="POST" action="/form/delete/<%= form._id %>" onsubmit="return confirm('Supprimer ce formulaire ?');" class="d-inline">
+                      <button class="btn btn-sm btn-outline-light" type="submit"><i class="bi bi-trash"></i></button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="6" class="text-white-60">Aucun formulaire. Cree ton premier formulaire.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
+</section>

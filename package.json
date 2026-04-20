@@ -1,20 +1,31 @@
 {
   "name": "form-saas-app",
-  "version": "1.0.0",
-  "description": "Multi‑tenant form generation platform with separate client and company roles",
+  "version": "1.1.0",
+  "description": "Multi-tenant form generation platform for B2B workflows",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "dev:https": "set HTTPS_ENABLED=true&& nodemon app.js",
+    "test": "node --test"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "mongoose": "^7.6.1",
-    "ejs": "^3.1.9",
-    "express-session": "^1.17.3",
-    "connect-mongo": "^4.6.0",
     "bcryptjs": "^2.4.3",
-    "multer": "^1.4.5-lts.1",
-    "dotenv": "^16.3.1",
-    "express-ejs-layouts": "^2.5.1"
+    "connect-mongo": "^5.1.0",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
+    "helmet": "^8.1.0",
+    "mongoose": "^8.9.5",
+    "multer": "^2.0.2",
+    "selfsigned": "^2.4.1"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^10.1.4",
+    "nodemon": "^3.1.7",
+    "supertest": "^7.0.0"
   }
 }
