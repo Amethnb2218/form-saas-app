@@ -7,6 +7,8 @@ Cette version inclut une refonte premium du frontend et un backend plus robuste:
 - lifecycle de formulaire (draft/published/archived)
 - slug public et liens partageables
 - dashboard professionnel (KPI, filtres, actions)
+- catalogue des formulaires crees (/formulaires)
+- annuaire des entreprises inscrites (/entreprises)
 - export CSV des soumissions
 - duplication de formulaire
 - settings entreprise (profil + mot de passe)
@@ -20,6 +22,12 @@ Cette version inclut une refonte premium du frontend et un backend plus robuste:
   - edition, suppression, duplication
   - changement rapide de statut
   - suivi des soumissions par formulaire
+- Catalogue formulaires:
+  - liste des formulaires crees avec filtres (recherche, categorie, statut)
+  - perimetre plateforme ou mes formulaires
+- Annuaire entreprises:
+  - liste des entreprises inscrites
+  - metriques par entreprise (formulaires, soumissions)
 - Formulaires publics:
   - route slug: /f/:slug
   - compatibilite route historique: /form/:id
@@ -140,6 +148,8 @@ Types supportes:
 
 - GET /health
 - GET /
+- GET /formulaires
+- GET /entreprises
 - GET /dashboard
 - GET /settings
 - GET /f/:slug
@@ -148,6 +158,6 @@ Types supportes:
 
 ## Notes dev
 
-- Si MONGODB_URI est absent en developpement, l'application tente Mongo local puis bascule automatiquement en in-memory MongoDB.
+- Si MONGODB_URI est absent (ou pointe vers localhost) en developpement, l'application tente Mongo local puis bascule automatiquement en in-memory MongoDB.
 - En mode in-memory, les donnees ne sont pas persistantes.
 - Si le fallback in-memory est lent a demarrer (Windows/first run), augmentez MONGO_MEMORY_LAUNCH_TIMEOUT_MS.

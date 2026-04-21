@@ -7,7 +7,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "dev:https": "set HTTPS_ENABLED=true&& nodemon app.js",
-    "test": "node --test"
+    "test": "set NODE_ENV=test&& node --test"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

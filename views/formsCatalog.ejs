@@ -1,0 +1,133 @@
+<section class="catalog-page">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+      <h2 class="text-white fw-bold mb-1">Formulaires crees</h2>
+      <div class="text-white-60">Catalogue des formulaires publies, plus tes formulaires prives si tu es connecte.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <% if (currentUser) { %>
+        <a href="/form/new" class="btn btn-primary rounded-pill px-4">
+          <i class="bi bi-plus-circle"></i> Nouveau formulaire
+        </a>
+      <% } %>
+      <a href="/entreprises" class="btn btn-outline-light rounded-pill px-4">
+        <i class="bi bi-buildings"></i> Entreprises
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-4">
+      <div class="metric-tile h-100">
+        <div class="metric-value"><%= metrics.visibleForms %></div>
+        <div class="metric-label">Formulaires visibles</div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-4">
+      <div class="metric-tile h-100">
+        <div class="metric-value"><%= metrics.publishedForms %></div>
+        <div class="metric-label">Publies (plateforme)</div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-4">
+      <div class="metric-tile h-100">
+        <div class="metric-value"><%= metrics.myForms %></div>
+        <div class="metric-label">Mes formulaires</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-glass p-3 p-lg-4 text-white shadow-lg mb-4">
+    <form class="row g-2 align-items-end" method="GET" action="/formulaires">
+      <div class="col-md-4">
+        <label class="form-label mb-1">Recherche</label>
+        <input
+          class="form-control"
+          name="q"
+          value="<%= filters.q || '' %>"
+          placeholder="Titre, slug, categorie..."
+        />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label mb-1">Categorie</label>
+        <select class="form-select" name="category">
+          <option value="all" <%= filters.category === 'all' ? 'selected' : '' %>>Toutes</option>
+          <% categories.forEach(category => { %>
+            <option value="<%= category %>" <%= filters.category === category ? 'selected' : '' %>><%= category %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label mb-1">Statut</label>
+        <select class="form-select" name="status">
+          <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>Tous</option>
+          <option value="published" <%= filters.status === 'published' ? 'selected' : '' %>>Publie</option>
+          <option value="draft" <%= filters.status === 'draft' ? 'selected' : '' %>>Brouillon</option>
+          <option value="archived" <%= filters.status === 'archived' ? 'selected' : '' %>>Archive</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label mb-1">Perimetre</label>
+        <select class="form-select" name="scope">
+          <option value="all" <%= filters.scope === 'all' ? 'selected' : '' %>>Plateforme</option>
+          <% if (currentUser) { %>
+            <option value="mine" <%= filters.scope === 'mine' ? 'selected' : '' %>>Mes formulaires</option>
+          <% } %>
+        </select>
+      </div>
+      <div class="col-md-1 d-grid">
+        <button class="btn btn-outline-light" type="submit"><i class="bi bi-funnel"></i></button>
+      </div>
+    </form>
+  </div>
+
+  <% if (forms.length) { %>
+    <div class="row g-3">
+      <% forms.forEach(form => { %>
+        <div class="col-md-6 col-xl-4">
+          <article class="catalog-card h-100">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h6 class="fw-bold mb-0"><%= form.title %></h6>
+              <span class="badge rounded-pill <%= form.status === 'published' ? 'text-bg-success' : (form.status === 'draft' ? 'text-bg-warning' : 'text-bg-secondary') %>">
+                <%= form.status %>
+              </span>
+            </div>
+
+            <div class="small text-white-60 mb-1">
+              <i class="bi bi-building"></i> <%= form.company?.companyName || 'Entreprise' %>
+            </div>
+            <div class="small text-white-60 mb-1">
+              <i class="bi bi-tag"></i> <%= form.category || 'General' %>
+            </div>
+            <div class="small text-white-60 mb-1">
+              <i class="bi bi-link-45deg"></i> /<%= form.slug || form._id %>
+            </div>
+            <div class="small text-white-60 mb-3">
+              <i class="bi bi-bar-chart"></i> <%= form.submissionCount || 0 %> reponses
+            </div>
+
+            <% if (form.description) { %>
+              <p class="text-white-60 small mb-3"><%= form.description %></p>
+            <% } %>
+
+            <div class="d-flex flex-wrap gap-2 mt-auto">
+              <a class="btn btn-outline-light btn-sm rounded-pill" target="_blank" href="<%= form.slug ? ('/f/' + form.slug) : ('/form/' + form._id) %>">
+                <i class="bi bi-box-arrow-up-right"></i> Ouvrir
+              </a>
+              <% if (currentUser && String(form.company?._id || '') === String(currentUser.id || '')) { %>
+                <a class="btn btn-outline-light btn-sm rounded-pill" href="/form/edit/<%= form._id %>">
+                  <i class="bi bi-pencil"></i> Modifier
+                </a>
+              <% } %>
+            </div>
+          </article>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="empty-state text-white-60">
+      <i class="bi bi-ui-checks-grid me-2"></i>
+      Aucun formulaire ne correspond aux filtres.
+    </div>
+  <% } %>
+</section>

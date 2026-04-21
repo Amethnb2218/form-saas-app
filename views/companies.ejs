@@ -1,0 +1,83 @@
+<section class="directory-page">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+      <h2 class="text-white fw-bold mb-1">Entreprises inscrites</h2>
+      <div class="text-white-60">Consulte la liste des entreprises actives et leurs statistiques de formulaires.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/formulaires" class="btn btn-outline-light rounded-pill px-4">
+        <i class="bi bi-ui-checks-grid"></i> Voir les formulaires
+      </a>
+      <a href="/" class="btn btn-outline-light rounded-pill px-4">
+        <i class="bi bi-house"></i> Accueil
+      </a>
+    </div>
+  </div>
+
+  <div class="card-glass p-3 p-lg-4 text-white shadow-lg mb-4">
+    <form class="row g-2 align-items-end" method="GET" action="/entreprises">
+      <div class="col-md-9">
+        <label class="form-label mb-1">Recherche entreprise</label>
+        <input
+          class="form-control"
+          name="q"
+          value="<%= filters.q || '' %>"
+          placeholder="Nom entreprise ou identifiant"
+        />
+      </div>
+      <div class="col-md-3 d-grid">
+        <button class="btn btn-outline-light" type="submit"><i class="bi bi-search"></i> Rechercher</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-buildings"></i> Annuaire</h5>
+    <span class="badge rounded-pill text-bg-light"><%= companies.length %></span>
+  </div>
+
+  <% if (companies.length) { %>
+    <div class="row g-3">
+      <% companies.forEach(company => { %>
+        <div class="col-md-6 col-xl-4">
+          <article class="directory-card h-100">
+            <div class="d-flex align-items-start gap-3 mb-3">
+              <div class="company-avatar">
+                <%= (company.companyName || 'E').charAt(0).toUpperCase() %>
+              </div>
+              <div>
+                <h6 class="fw-bold mb-1"><%= company.companyName %></h6>
+                <div class="small text-white-60">@<%= company.username %></div>
+                <div class="small text-white-60">Inscrite le <%= new Date(company.createdAt || Date.now()).toLocaleDateString() %></div>
+              </div>
+            </div>
+
+            <div class="directory-metrics d-grid gap-2 mb-3">
+              <div class="d-flex justify-content-between small">
+                <span class="text-white-60">Formulaires total</span>
+                <strong><%= company.metrics.totalForms %></strong>
+              </div>
+              <div class="d-flex justify-content-between small">
+                <span class="text-white-60">Formulaires publies</span>
+                <strong><%= company.metrics.publishedForms %></strong>
+              </div>
+              <div class="d-flex justify-content-between small">
+                <span class="text-white-60">Soumissions</span>
+                <strong><%= company.metrics.totalSubmissions %></strong>
+              </div>
+            </div>
+
+            <a href="/formulaires?q=<%= encodeURIComponent(company.companyName) %>" class="btn btn-outline-light btn-sm rounded-pill">
+              <i class="bi bi-filter-square"></i> Voir ses formulaires
+            </a>
+          </article>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="empty-state text-white-60">
+      <i class="bi bi-building me-2"></i>
+      Aucune entreprise ne correspond a ta recherche.
+    </div>
+  <% } %>
+</section>

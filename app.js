@@ -86,10 +86,36 @@ function sanitizeFileName(value, fallback) {
   return safe || fallback;
 }
 
+function isLocalMongoUri(uri) {
+  const normalized = normalizeText(uri).toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  const withoutProtocol = normalized.replace(/^mongodb(?:\+srv)?:\/\//, '');
+  if (withoutProtocol === normalized) {
+    return false;
+  }
+
+  const authority = withoutProtocol.split('/')[0] || '';
+  const hostsPart = authority.includes('@') ? authority.split('@').pop() : authority;
+  const hosts = String(hostsPart || '').split(',').map(host => host.trim()).filter(Boolean);
+
+  if (hosts.length === 0) {
+    return false;
+  }
+
+  return hosts.every(host => {
+    const hostname = host.split(':')[0].replace(/^\[|\]$/g, '');
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+  });
+}
+
 const PORT = Number(process.env.PORT) || 3000;
 const EXPLICIT_MONGODB_URI = normalizeText(process.env.MONGODB_URI);
 const DEFAULT_LOCAL_MONGODB_URI = 'mongodb://127.0.0.1:27017/formsaas';
 const MONGODB_URI = EXPLICIT_MONGODB_URI || DEFAULT_LOCAL_MONGODB_URI;
+const EXPLICIT_MONGODB_URI_IS_LOCAL = isLocalMongoUri(EXPLICIT_MONGODB_URI);
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev_only_change_me';
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const IS_PROD = NODE_ENV === 'production';
@@ -113,8 +139,14 @@ if (!process.env.SESSION_SECRET) {
   console.warn('SESSION_SECRET is not set. Using a development fallback secret.');
 }
 
-if (!EXPLICIT_MONGODB_URI && !IS_PROD) {
-  console.warn('MONGODB_URI is not set. Trying local MongoDB first, then in-memory fallback in development.');
+if (!IS_PROD) {
+  if (!EXPLICIT_MONGODB_URI) {
+    console.warn('MONGODB_URI is not set. Trying local MongoDB first, then in-memory fallback in development.');
+  } else if (EXPLICIT_MONGODB_URI_IS_LOCAL) {
+    console.warn(
+      'MONGODB_URI points to local MongoDB. If local Mongo is unavailable, in-memory fallback will be used in development.'
+    );
+  }
 }
 
 const uploadDir = path.join(__dirname, 'public', 'uploads');
@@ -510,13 +542,15 @@ const sessionConfig = {
 };
 
 if (NODE_ENV !== 'test') {
-  if (EXPLICIT_MONGODB_URI) {
+  const canUseMongoSessionStore = EXPLICIT_MONGODB_URI && (IS_PROD || !EXPLICIT_MONGODB_URI_IS_LOCAL);
+
+  if (canUseMongoSessionStore) {
     sessionConfig.store = MongoStore.create({
       mongoUrl: EXPLICIT_MONGODB_URI,
       ttl: 14 * 24 * 60 * 60
     });
   } else if (!IS_PROD) {
-    console.warn('Session store MongoDB disabled in development (MONGODB_URI missing). Using in-memory session store.');
+    console.warn('Session store MongoDB disabled in development. Using in-memory session store.');
   }
 }
 
@@ -709,6 +743,146 @@ app.get(
     ]);
 
     res.render('index', { title: 'Accueil', companies, forms });
+  })
+);
+
+app.get(
+  '/entreprises',
+  asyncHandler(async (req, res) => {
+    const q = normalizeText(req.query.q);
+    const companyFilter = {};
+
+    if (q) {
+      const regex = new RegExp(escapeRegex(q), 'i');
+      companyFilter.$or = [{ companyName: regex }, { username: regex }];
+    }
+
+    const companies = await User.find(companyFilter, 'companyName username logoPath createdAt')
+      .sort({ companyName: 1 })
+      .lean();
+
+    const companyIds = companies.map(company => company._id);
+    let statsByCompanyId = new Map();
+
+    if (companyIds.length > 0) {
+      const stats = await Form.aggregate([
+        { $match: { company: { $in: companyIds } } },
+        {
+          $group: {
+            _id: '$company',
+            totalForms: { $sum: 1 },
+            publishedForms: {
+              $sum: {
+                $cond: [{ $eq: ['$status', 'published'] }, 1, 0]
+              }
+            },
+            totalSubmissions: { $sum: '$submissionCount' }
+          }
+        }
+      ]);
+
+      statsByCompanyId = new Map(stats.map(item => [String(item._id), item]));
+    }
+
+    const companiesWithMetrics = companies.map(company => {
+      const metrics = statsByCompanyId.get(String(company._id));
+
+      return {
+        ...company,
+        metrics: {
+          totalForms: Number(metrics?.totalForms || 0),
+          publishedForms: Number(metrics?.publishedForms || 0),
+          totalSubmissions: Number(metrics?.totalSubmissions || 0)
+        }
+      };
+    });
+
+    res.render('companies', {
+      title: 'Entreprises inscrites',
+      companies: companiesWithMetrics,
+      filters: { q }
+    });
+  })
+);
+
+app.get(
+  '/formulaires',
+  asyncHandler(async (req, res) => {
+    const q = normalizeText(req.query.q);
+    const requestedCategory = normalizeText(req.query.category).toLowerCase();
+    const matchedCategory = formCategories.find(
+      categoryName => categoryName.toLowerCase() === requestedCategory
+    );
+    const category = requestedCategory && requestedCategory !== 'all' && matchedCategory
+      ? matchedCategory
+      : 'all';
+
+    const requestedStatus = normalizeText(req.query.status).toLowerCase();
+    let status = requestedStatus && requestedStatus !== 'all' && allowedFormStatuses.has(requestedStatus)
+      ? requestedStatus
+      : 'all';
+
+    const isLoggedIn = Boolean(req.session.user?.id);
+    const requestedScope = normalizeText(req.query.scope).toLowerCase();
+    let scope = requestedScope === 'mine' && isLoggedIn ? 'mine' : 'all';
+
+    if (!isLoggedIn && status !== 'all' && status !== 'published') {
+      status = 'published';
+    }
+
+    const filters = [];
+
+    if (scope === 'mine') {
+      filters.push({ company: req.session.user.id });
+    } else {
+      const visibilityRules = [{ status: 'published' }];
+      if (isLoggedIn) {
+        visibilityRules.push({ company: req.session.user.id });
+      }
+      filters.push({ $or: visibilityRules });
+    }
+
+    if (status !== 'all') {
+      filters.push({ status });
+    }
+
+    if (category !== 'all') {
+      filters.push({ category });
+    }
+
+    if (q) {
+      const regex = new RegExp(escapeRegex(q), 'i');
+      filters.push({
+        $or: [{ title: regex }, { slug: regex }, { description: regex }, { category: regex }]
+      });
+    }
+
+    const query = filters.length > 1 ? { $and: filters } : filters[0] || {};
+
+    const forms = await Form.find(
+      query,
+      'title slug status category description company submissionCount createdAt updatedAt'
+    )
+      .populate('company', 'companyName')
+      .sort({ updatedAt: -1 })
+      .lean();
+
+    const [publishedCount, myFormsCount] = await Promise.all([
+      Form.countDocuments({ status: 'published' }),
+      isLoggedIn ? Form.countDocuments({ company: req.session.user.id }) : 0
+    ]);
+
+    res.render('formsCatalog', {
+      title: 'Formulaires',
+      forms,
+      categories: formCategories,
+      filters: { q, category, status, scope },
+      metrics: {
+        visibleForms: forms.length,
+        publishedForms: publishedCount,
+        myForms: myFormsCount
+      }
+    });
   })
 );
 
@@ -1349,7 +1523,7 @@ async function connectToDatabase() {
     console.log(`Connected to MongoDB at ${MONGODB_URI}`);
     return;
   } catch (initialError) {
-    const canUseFallback = !IS_PROD && !EXPLICIT_MONGODB_URI;
+    const canUseFallback = !IS_PROD && (!EXPLICIT_MONGODB_URI || EXPLICIT_MONGODB_URI_IS_LOCAL);
 
     if (!canUseFallback) {
       throw initialError;

@@ -10,6 +10,10 @@
       </div>
 
       <form class="input-glow" method="POST" action="/form/new">
+        <% const fieldRows = Array.isArray(formData.fields) && formData.fields.length
+          ? formData.fields
+          : [{ name: '', label: '', type: 'text', required: false, placeholder: '', helpText: '' }]; %>
+
         <div class="row g-3">
           <div class="col-md-8">
             <label class="form-label">Titre</label>
@@ -47,10 +51,113 @@
             <textarea class="form-control bg-glass" rows="3" name="description" placeholder="Objectif du formulaire, public cible, informations attendues..."><%= formData.description %></textarea>
           </div>
           <div class="col-12">
-            <label class="form-label">Champs (JSON)</label>
-            <textarea class="form-control bg-glass" rows="12" name="fieldsJson" required><%= formData.fieldsJson %></textarea>
-            <div class="form-text text-white-60">
-              Format attendu: tableau JSON avec name, label, type, required, placeholder, helpText.
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+              <label class="form-label mb-0">Champs du formulaire</label>
+              <button type="button" id="addFieldRowBtn" class="btn btn-outline-light btn-sm rounded-pill">
+                <i class="bi bi-plus-circle"></i> Ajouter un champ
+              </button>
+            </div>
+
+            <div id="fieldRows" class="field-builder d-grid gap-2">
+              <% fieldRows.forEach((field, index) => { %>
+                <div class="field-row card-glass p-3" data-row-index="<%= index %>">
+                  <div class="row g-2 align-items-end">
+                    <div class="col-md-3">
+                      <label class="form-label">Nom technique (optionnel)</label>
+                      <input class="form-control" name="fieldName[]" value="<%= field.name || '' %>" placeholder="full_name" />
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label">Label</label>
+                      <input class="form-control" name="fieldLabel[]" value="<%= field.label || '' %>" placeholder="Nom complet" />
+                    </div>
+                    <div class="col-md-2">
+                      <label class="form-label">Type</label>
+                      <select class="form-select" name="fieldType[]">
+                        <option value="text" <%= (field.type || 'text') === 'text' ? 'selected' : '' %>>Texte</option>
+                        <option value="email" <%= field.type === 'email' ? 'selected' : '' %>>Email</option>
+                        <option value="number" <%= field.type === 'number' ? 'selected' : '' %>>Nombre</option>
+                        <option value="date" <%= field.type === 'date' ? 'selected' : '' %>>Date</option>
+                        <option value="textarea" <%= field.type === 'textarea' ? 'selected' : '' %>>Zone de texte</option>
+                        <option value="tel" <%= field.type === 'tel' ? 'selected' : '' %>>Telephone</option>
+                        <option value="url" <%= field.type === 'url' ? 'selected' : '' %>>URL</option>
+                        <option value="checkbox" <%= field.type === 'checkbox' ? 'selected' : '' %>>Case a cocher</option>
+                      </select>
+                    </div>
+                    <div class="col-md-2">
+                      <label class="form-label">Obligatoire</label>
+                      <select class="form-select" name="fieldRequired[]">
+                        <option value="false" <%= !field.required ? 'selected' : '' %>>Non</option>
+                        <option value="true" <%= field.required ? 'selected' : '' %>>Oui</option>
+                      </select>
+                    </div>
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-outline-light w-100 js-remove-field">
+                        <i class="bi bi-trash"></i> Supprimer
+                      </button>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Placeholder</label>
+                      <input class="form-control" name="fieldPlaceholder[]" value="<%= field.placeholder || '' %>" placeholder="Ex: Marie Diallo" />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Texte d'aide</label>
+                      <input class="form-control" name="fieldHelpText[]" value="<%= field.helpText || '' %>" placeholder="Information complementaire" />
+                    </div>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+
+            <template id="fieldRowTemplate">
+              <div class="field-row card-glass p-3">
+                <div class="row g-2 align-items-end">
+                  <div class="col-md-3">
+                    <label class="form-label">Nom technique (optionnel)</label>
+                    <input class="form-control" name="fieldName[]" placeholder="full_name" />
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Label</label>
+                    <input class="form-control" name="fieldLabel[]" placeholder="Nom complet" />
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" name="fieldType[]">
+                      <option value="text">Texte</option>
+                      <option value="email">Email</option>
+                      <option value="number">Nombre</option>
+                      <option value="date">Date</option>
+                      <option value="textarea">Zone de texte</option>
+                      <option value="tel">Telephone</option>
+                      <option value="url">URL</option>
+                      <option value="checkbox">Case a cocher</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">Obligatoire</label>
+                    <select class="form-select" name="fieldRequired[]">
+                      <option value="false" selected>Non</option>
+                      <option value="true">Oui</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-light w-100 js-remove-field">
+                      <i class="bi bi-trash"></i> Supprimer
+                    </button>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Placeholder</label>
+                    <input class="form-control" name="fieldPlaceholder[]" placeholder="Ex: Marie Diallo" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Texte d'aide</label>
+                    <input class="form-control" name="fieldHelpText[]" placeholder="Information complementaire" />
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <div class="form-text text-white-60 mt-2">
+              Creation simple: ajoute des champs avec le bouton, sans JSON.
             </div>
           </div>
         </div>
@@ -67,3 +174,5 @@
     </div>
   </div>
 </div>
+
+<script src="/js/field-builder.js"></script>
